@@ -310,6 +310,30 @@ const usuariosPageStyles = {
     mb: 3,
     borderRadius: 2.5,
   },
+
+  headerActions: {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  flexWrap: 'wrap',
+  gap: 1.5,
+},
+
+roleButton: {
+  minHeight: 44,
+  paddingX: 2.5,
+  borderColor: '#008C7A',
+  borderRadius: '12px',
+  color: '#007467',
+  fontWeight: 700,
+  textTransform: 'none',
+
+  '&:hover': {
+    borderColor: '#006F63',
+    backgroundColor: 'rgba(0, 140, 122, 0.08)',
+  },
+},
+
 }
 
 export default usuariosPageStyles

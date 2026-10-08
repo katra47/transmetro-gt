@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import {
   Alert,
@@ -23,6 +24,7 @@ import {
 } from '@mui/material'
 
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded'
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
@@ -224,17 +226,33 @@ function UsuariosPage() {
             </Box>
           </Box>
 
-          <PermissionGuard permission="usuarios.crear">
-            <Button
-              type="button"
-              variant="contained"
-              startIcon={<AddRoundedIcon />}
-              onClick={handleNewUser}
-              sx={usuariosPageStyles.addButton}
-            >
-              Autorizar usuario
-            </Button>
-          </PermissionGuard>
+          <Box sx={usuariosPageStyles.headerActions}>
+            <PermissionGuard permission="usuarios.crear">
+              <Button
+                type="button"
+                variant="contained"
+                startIcon={<AddRoundedIcon />}
+                onClick={handleNewUser}
+                sx={usuariosPageStyles.addButton}
+              >
+                Autorizar usuario
+              </Button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="roles.crear">
+              <Button
+                component={Link}
+                to="/roles"
+                variant="outlined"
+                startIcon={
+                  <AdminPanelSettingsRoundedIcon />
+                }
+                sx={usuariosPageStyles.roleButton}
+              >
+                Crear rol
+              </Button>
+            </PermissionGuard>
+          </Box>
         </Box>
 
         {error && (
@@ -428,12 +446,16 @@ function UsuariosPage() {
                 <TableBody>
                   {filteredUsers.map((user) => {
                     const role = rolesById[user.rolId]
+
                     const isActive =
                       user.estado === 'ACTIVO'
+
                     const isProcessing =
                       processingId === user.id
+
                     const isCurrentUser =
                       firebaseUser?.uid === user.id
+
                     const isProtectedUser =
                       role?.protegido === true
 
@@ -557,10 +579,8 @@ function UsuariosPage() {
                                         }
                                         sx={
                                           isActive
-                                            ? usuariosPageStyles
-                                                .deactivateButton
-                                            : usuariosPageStyles
-                                                .activateButton
+                                            ? usuariosPageStyles.deactivateButton
+                                            : usuariosPageStyles.activateButton
                                         }
                                       >
                                         {isProcessing ? (
