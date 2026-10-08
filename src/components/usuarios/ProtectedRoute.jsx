@@ -1,15 +1,9 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 
 import {
   Box,
-  Button,
   CircularProgress,
-  Paper,
-  Typography,
 } from '@mui/material'
-
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
-import LockPersonRoundedIcon from '@mui/icons-material/LockPersonRounded'
 
 import { useAuth } from './AuthContext'
 import protectedRouteStyles from './ProtectedRoute.styles'
@@ -19,7 +13,6 @@ function ProtectedRoute({
   requiredPermission = null,
 }) {
   const location = useLocation()
-  const navigate = useNavigate()
 
   const {
     loading,
@@ -36,7 +29,7 @@ function ProtectedRoute({
     )
   }
 
-  if (!isAuthenticated || !isAuthorized) {
+  if (!isAuthenticated) {
     return (
       <Navigate
         to="/iniciar-sesion"
@@ -46,45 +39,15 @@ function ProtectedRoute({
     )
   }
 
+  if (!isAuthorized) {
+    return <Navigate to="/" replace />
+  }
+
   if (
     requiredPermission &&
     !hasPermission(requiredPermission)
   ) {
-    return (
-      <Box sx={protectedRouteStyles.deniedContainer}>
-        <Paper
-          elevation={0}
-          sx={protectedRouteStyles.deniedCard}
-        >
-          <Box sx={protectedRouteStyles.deniedIcon}>
-            <LockPersonRoundedIcon sx={{ fontSize: 38 }} />
-          </Box>
-
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={protectedRouteStyles.deniedTitle}
-          >
-            Acceso restringido
-          </Typography>
-
-          <Typography sx={protectedRouteStyles.deniedDescription}>
-            Tu cuenta inició sesión correctamente, pero el rol
-            asignado no tiene permiso para acceder a este módulo.
-          </Typography>
-
-          <Button
-            type="button"
-            variant="contained"
-            startIcon={<HomeRoundedIcon />}
-            onClick={() => navigate('/')}
-            sx={protectedRouteStyles.homeButton}
-          >
-            Volver al inicio
-          </Button>
-        </Paper>
-      </Box>
-    )
+    return <Navigate to="/" replace />
   }
 
   return children
