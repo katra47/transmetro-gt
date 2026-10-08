@@ -24,7 +24,7 @@ import ProtectedRoute from './components/usuarios/ProtectedRoute'
 import RolesPage from './components/usuarios/RolesPage'
 import UsuariosPage from './components/usuarios/UsuariosPage'
 import PilotosPage from './components/pilotos/PilotosPage'
-
+import LineasPage from './components/lineas/LineasPage'
 
 function App() {
   return (
@@ -41,11 +41,9 @@ function App() {
           <Route
             path="lineas"
             element={
-              <ModulePage
-                title="Líneas"
-                description="Consulta las líneas y rutas disponibles del Transmetro."
-                icon={<AltRouteRoundedIcon />}
-              />
+              <ProtectedRoute requiredPermission="lineas.ver">
+                <LineasPage />
+              </ProtectedRoute>
             }
           />
 
