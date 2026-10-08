@@ -25,6 +25,7 @@ import RolesPage from './components/usuarios/RolesPage'
 import UsuariosPage from './components/usuarios/UsuariosPage'
 import PilotosPage from './components/pilotos/PilotosPage'
 import LineasPage from './components/lineas/LineasPage'
+import EstacionesPage from './components/estaciones/EstacionesPage'
 
 function App() {
   return (
@@ -50,11 +51,9 @@ function App() {
           <Route
             path="estaciones"
             element={
-              <ModulePage
-                title="Estaciones"
-                description="Consulta las estaciones, ubicaciones y accesos."
-                icon={<TrainRoundedIcon />}
-              />
+              <ProtectedRoute requiredPermission="estaciones.ver">
+                <EstacionesPage />
+              </ProtectedRoute>
             }
           />
 
