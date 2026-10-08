@@ -23,6 +23,8 @@ import LoginPage from './components/usuarios/LoginPage'
 import ProtectedRoute from './components/usuarios/ProtectedRoute'
 import RolesPage from './components/usuarios/RolesPage'
 import UsuariosPage from './components/usuarios/UsuariosPage'
+import PilotosPage from './components/pilotos/PilotosPage'
+
 
 function App() {
   return (
@@ -81,12 +83,8 @@ function App() {
           <Route
             path="pilotos"
             element={
-              <ProtectedRoute requiredPermission="pilotos.consultar">
-                <ModulePage
-                  title="Pilotos"
-                  description="Registro, información de contacto e historial educativo de los pilotos."
-                  icon={<BadgeRoundedIcon />}
-                />
+              <ProtectedRoute permission="pilotos.consultar">
+                <PilotosPage />
               </ProtectedRoute>
             }
           />
