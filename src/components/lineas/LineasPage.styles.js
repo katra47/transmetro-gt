@@ -15,8 +15,6 @@ const lineasPageStyles = {
   },
 
   header: {
-    position: 'relative',
-    overflow: 'hidden',
     marginBottom: 3,
     padding: {
       xs: 2.5,
@@ -26,23 +24,9 @@ const lineasPageStyles = {
     color: '#FFFFFF',
     background:
       'linear-gradient(120deg, #082F49 0%, #0B5361 58%, #008C7A 100%)',
-    boxShadow: '0 18px 45px rgba(7, 47, 62, 0.18)',
-
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      width: 220,
-      height: 220,
-      right: -70,
-      top: -90,
-      borderRadius: '50%',
-      backgroundColor: 'rgba(255,255,255,0.07)',
-    },
   },
 
   headerContent: {
-    position: 'relative',
-    zIndex: 1,
     display: 'flex',
     alignItems: {
       xs: 'flex-start',
@@ -67,7 +51,6 @@ const lineasPageStyles = {
     height: 58,
     display: 'grid',
     placeItems: 'center',
-    flexShrink: 0,
     borderRadius: '17px',
     color: '#082F49',
     backgroundColor: '#D6A84B',
@@ -82,19 +65,14 @@ const lineasPageStyles = {
   },
 
   description: {
-    maxWidth: 650,
-    marginTop: 0.5,
     color: 'rgba(255,255,255,0.72)',
-    fontSize: '0.9rem',
   },
 
   addButton: {
-    flexShrink: 0,
     borderRadius: '12px',
     color: '#082F49',
     backgroundColor: '#D6A84B',
     fontWeight: 800,
-    boxShadow: '0 10px 25px rgba(0,0,0,0.18)',
 
     '&:hover': {
       backgroundColor: '#E3B95D',
@@ -112,35 +90,19 @@ const lineasPageStyles = {
   },
 
   statisticCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1.5,
     padding: 2.2,
     border: '1px solid #E2ECE8',
     borderRadius: '18px',
     backgroundColor: '#FFFFFF',
-    boxShadow: '0 10px 30px rgba(7, 47, 62, 0.07)',
-  },
-
-  statisticIcon: {
-    width: 44,
-    height: 44,
-    display: 'grid',
-    placeItems: 'center',
-    borderRadius: '13px',
-    color: '#007A70',
-    backgroundColor: '#DDF5EE',
   },
 
   statisticValue: {
     color: '#082F49',
     fontSize: '1.45rem',
     fontWeight: 900,
-    lineHeight: 1,
   },
 
   statisticLabel: {
-    marginTop: 0.5,
     color: '#64748B',
     fontSize: '0.78rem',
     fontWeight: 600,
@@ -151,49 +113,33 @@ const lineasPageStyles = {
     border: '1px solid #E2ECE8',
     borderRadius: '20px',
     backgroundColor: '#FFFFFF',
-    boxShadow: '0 14px 40px rgba(7, 47, 62, 0.08)',
   },
 
   toolbar: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: {
       xs: 'stretch',
       sm: 'center',
     },
-    justifyContent: 'space-between',
     flexDirection: {
       xs: 'column',
       sm: 'row',
     },
     gap: 2,
     padding: 2.5,
-    borderBottom: '1px solid #E8EFEC',
-  },
-
-  sectionTitle: {
-    color: '#082F49',
-    fontSize: '1.05rem',
-    fontWeight: 800,
   },
 
   searchField: {
     width: {
       xs: '100%',
-      sm: 330,
+      sm: 340,
     },
 
     '& .MuiOutlinedInput-root': {
       borderRadius: '12px',
       backgroundColor: '#F8FAFC',
-
-      '&.Mui-focused fieldset': {
-        borderColor: '#008C7A',
-      },
     },
-  },
-
-  tableContainer: {
-    overflowX: 'auto',
   },
 
   tableHeader: {
@@ -201,20 +147,9 @@ const lineasPageStyles = {
 
     '& .MuiTableCell-root': {
       color: '#47615E',
-      fontSize: '0.74rem',
+      fontSize: '0.72rem',
       fontWeight: 800,
-      letterSpacing: '0.04em',
       textTransform: 'uppercase',
-    },
-  },
-
-  tableRow: {
-    '&:last-child .MuiTableCell-root': {
-      borderBottom: 0,
-    },
-
-    '&:hover': {
-      backgroundColor: '#FAFCFB',
     },
   },
 
@@ -228,30 +163,27 @@ const lineasPageStyles = {
     fontWeight: 700,
   },
 
-  descriptionCell: {
-    maxWidth: 300,
+  secondaryText: {
     color: '#64748B',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    fontSize: '0.76rem',
+  },
+
+  stationChip: {
+    color: '#006F63',
+    backgroundColor: '#DDF5EE',
+    fontWeight: 800,
+    cursor: 'help',
+  },
+
+  noStationsChip: {
+    color: '#9A6500',
+    backgroundColor: '#FFF2CC',
+    fontWeight: 800,
   },
 
   statusChip: {
-    fontWeight: 800,
     fontSize: '0.7rem',
-  },
-
-  actionsCell: {
-    width: 80,
-    textAlign: 'right',
-  },
-
-  actionButton: {
-    color: '#0B5361',
-
-    '&:hover': {
-      backgroundColor: '#E2F3EF',
-    },
+    fontWeight: 800,
   },
 
   loadingContainer: {
@@ -262,41 +194,89 @@ const lineasPageStyles = {
 
   emptyContainer: {
     minHeight: 300,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    padding: 4,
-    textAlign: 'center',
-  },
-
-  emptyIcon: {
-    width: 64,
-    height: 64,
     display: 'grid',
     placeItems: 'center',
-    marginBottom: 2,
-    borderRadius: '18px',
-    color: '#008C7A',
-    backgroundColor: '#DDF5EE',
-  },
-
-  emptyTitle: {
-    color: '#082F49',
-    fontSize: '1.1rem',
-    fontWeight: 800,
-  },
-
-  emptyDescription: {
-    maxWidth: 430,
-    marginTop: 0.7,
-    color: '#64748B',
-    fontSize: '0.86rem',
+    padding: 4,
   },
 
   alert: {
     marginBottom: 2,
     borderRadius: '12px',
+  },
+
+  stationDialogPaper: {
+    width: '100%',
+    maxWidth: 900,
+    borderRadius: '22px',
+    backgroundColor: '#FFFEFA',
+  },
+
+  stationDialogTitle: {
+    padding: 2,
+  },
+
+  stationDialogHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1.5,
+    padding: 3,
+    color: '#FFFFFF',
+    background:
+      'linear-gradient(120deg, #082F49, #008C7A)',
+  },
+
+  stationDialogIcon: {
+    width: 46,
+    height: 46,
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: '14px',
+    color: '#082F49',
+    backgroundColor: '#D6A84B',
+  },
+
+  stationDialogContent: {
+    padding: 3,
+  },
+
+  stationForm: {
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: '1fr',
+      md: '2fr 0.7fr 1fr auto',
+    },
+    alignItems: 'center',
+    gap: 1.5,
+    marginBottom: 3,
+    padding: 2,
+    border: '1px solid #DDE9E5',
+    borderRadius: '16px',
+    backgroundColor: '#F7FBFA',
+  },
+
+  stationField: {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '11px',
+      backgroundColor: '#FFFFFF',
+    },
+  },
+
+  routeSummary: {
+    display: 'flex',
+    gap: 2,
+    flexWrap: 'wrap',
+    marginBottom: 2,
+  },
+
+  summaryChip: {
+    color: '#0B5361',
+    backgroundColor: '#E2F3EF',
+    fontWeight: 800,
+  },
+
+  dialogCloseButton: {
+    marginLeft: 'auto',
+    color: '#FFFFFF',
   },
 
   snackbarAlert: {

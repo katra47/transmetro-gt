@@ -29,10 +29,16 @@ import lineaFormStyles from './LineaForm.styles'
 const formularioInicial = {
   codigo: '',
   nombre: '',
-  municipalidad: '',
   descripcion: '',
   estado: 'ACTIVA',
 }
+
+const prepararFormulario = (linea) => ({
+  codigo: linea?.codigo ?? '',
+  nombre: linea?.nombre ?? '',
+  descripcion: linea?.descripcion ?? '',
+  estado: linea?.estado ?? 'ACTIVA',
+})
 
 function LineaForm({
   open,
@@ -40,10 +46,11 @@ function LineaForm({
   onClose,
   onSaved,
 }) {
-  const [form, setForm] = useState(() => ({
-    ...formularioInicial,
-    ...(linea ?? {}),
-  }))
+  const [form, setForm] = useState(() =>
+    linea
+      ? prepararFormulario(linea)
+      : formularioInicial,
+  )
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -59,29 +66,20 @@ function LineaForm({
     }))
   }
 
-  const validateForm = () => {
-    if (!form.codigo.trim()) {
-      return 'El código de la línea es obligatorio.'
-    }
-
-    if (!form.nombre.trim()) {
-      return 'El nombre de la línea es obligatorio.'
-    }
-
-    if (!form.municipalidad.trim()) {
-      return 'La municipalidad es obligatoria.'
-    }
-
-    return ''
-  }
-
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const validationError = validateForm()
+    if (!form.codigo.trim()) {
+      setError(
+        'El código de la línea es obligatorio.',
+      )
+      return
+    }
 
-    if (validationError) {
-      setError(validationError)
+    if (!form.nombre.trim()) {
+      setError(
+        'El nombre de la línea es obligatorio.',
+      )
       return
     }
 
@@ -95,37 +93,29 @@ function LineaForm({
         await crearLinea(form)
       }
 
-      if (onSaved) {
-        onSaved(
-          editing
-            ? 'La línea fue actualizada correctamente.'
-            : 'La línea fue registrada correctamente.',
-        )
-      }
+      onSaved(
+        editing
+          ? 'La línea fue actualizada correctamente.'
+          : 'La línea fue registrada correctamente.',
+      )
 
       onClose()
     } catch (saveError) {
-      console.error('Error al guardar la línea:', saveError)
+      console.error(saveError)
 
       setError(
         saveError.message ||
-          'No fue posible guardar la información de la línea.',
+          'No fue posible guardar la línea.',
       )
     } finally {
       setSaving(false)
     }
   }
 
-  const handleClose = () => {
-    if (!saving) {
-      onClose()
-    }
-  }
-
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={saving ? undefined : onClose}
       fullWidth
       maxWidth="sm"
       slotProps={{
@@ -157,14 +147,13 @@ function LineaForm({
                 </Typography>
 
                 <Typography sx={lineaFormStyles.subtitle}>
-                  Ingresa la información general de la línea.
+                  Ingresa los datos generales de la línea.
                 </Typography>
               </Box>
 
               <IconButton
                 type="button"
-                aria-label="Cerrar formulario"
-                onClick={handleClose}
+                onClick={onClose}
                 disabled={saving}
                 sx={lineaFormStyles.closeButton}
               >
@@ -190,11 +179,13 @@ function LineaForm({
               label="Código"
               value={form.codigo}
               onChange={handleChange}
-              placeholder="Ejemplo: L01"
               required
               disabled={saving}
-              inputProps={{
-                maxLength: 15,
+              placeholder="Ejemplo: L01"
+              slotProps={{
+                htmlInput: {
+                  maxLength: 15,
+                },
               }}
               sx={lineaFormStyles.field}
             />
@@ -204,25 +195,13 @@ function LineaForm({
               label="Nombre de la línea"
               value={form.nombre}
               onChange={handleChange}
-              placeholder="Ejemplo: Línea 1"
               required
               disabled={saving}
-              inputProps={{
-                maxLength: 80,
-              }}
-              sx={lineaFormStyles.field}
-            />
-
-            <TextField
-              name="municipalidad"
-              label="Municipalidad"
-              value={form.municipalidad}
-              onChange={handleChange}
-              placeholder="Ejemplo: Guatemala"
-              required
-              disabled={saving}
-              inputProps={{
-                maxLength: 100,
+              placeholder="Ejemplo: Línea Central"
+              slotProps={{
+                htmlInput: {
+                  maxLength: 80,
+                },
               }}
               sx={lineaFormStyles.field}
             />
@@ -254,12 +233,13 @@ function LineaForm({
               label="Descripción"
               value={form.descripcion}
               onChange={handleChange}
-              placeholder="Descripción general de la línea"
               multiline
               minRows={3}
               disabled={saving}
-              inputProps={{
-                maxLength: 300,
+              slotProps={{
+                htmlInput: {
+                  maxLength: 300,
+                },
               }}
               sx={{
                 ...lineaFormStyles.field,
@@ -273,7 +253,7 @@ function LineaForm({
           <Button
             type="button"
             variant="outlined"
-            onClick={handleClose}
+            onClick={onClose}
             disabled={saving}
             sx={lineaFormStyles.cancelButton}
           >

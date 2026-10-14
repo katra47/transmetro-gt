@@ -4,11 +4,13 @@ const lineaFormStyles = {
     maxWidth: 680,
     borderRadius: '22px',
     backgroundColor: '#FFFEFA',
-    boxShadow: '0 24px 70px rgba(7, 47, 62, 0.22)',
+    boxShadow: '0 24px 70px rgba(7,47,62,0.22)',
+   
   },
 
   dialogTitle: {
     padding: 0,
+    marginBottom: 2,
   },
 
   header: {
@@ -25,6 +27,7 @@ const lineaFormStyles = {
     display: 'flex',
     alignItems: 'center',
     gap: 1.5,
+    
   },
 
   headerIcon: {
@@ -56,23 +59,24 @@ const lineaFormStyles = {
     marginLeft: 'auto',
     color: '#FFFFFF',
     backgroundColor: 'rgba(255,255,255,0.10)',
-
-    '&:hover': {
-      backgroundColor: 'rgba(255,255,255,0.18)',
-    },
-  },
-
-  content: {
-    padding: {
-      xs: 2.5,
-      sm: 3,
-    },
   },
 
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 2.3,
+  },
+
+  content: {
+  paddingX: {
+    xs: 2.5,
+    sm: 3,
+  },
+  paddingBottom: {
+    xs: 2.5,
+    sm: 3,
+  },
+  paddingTop: '32px !important',
+
   },
 
   formGrid: {
@@ -107,6 +111,7 @@ const lineaFormStyles = {
   },
 
   alert: {
+    marginBottom: 2,
     borderRadius: '12px',
   },
 
@@ -115,7 +120,7 @@ const lineaFormStyles = {
     justifyContent: 'flex-end',
     gap: 1.5,
     padding: {
-      xs: '0 20px 22px',
+      xs: '1 20px 22px',
       sm: '0 24px 26px',
     },
   },
@@ -126,24 +131,17 @@ const lineaFormStyles = {
     color: '#475569',
     borderColor: '#CBD5E1',
     fontWeight: 700,
-
-    '&:hover': {
-      borderColor: '#94A3B8',
-      backgroundColor: '#F8FAFC',
-    },
   },
 
   submitButton: {
-    minWidth: 140,
+    minWidth: 145,
     borderRadius: '11px',
     color: '#FFFFFF',
     backgroundColor: '#008C7A',
-    boxShadow: '0 10px 24px rgba(0,140,122,0.22)',
     fontWeight: 800,
 
     '&:hover': {
       backgroundColor: '#00766A',
-      boxShadow: '0 12px 28px rgba(0,140,122,0.30)',
     },
   },
 }

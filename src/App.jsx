@@ -26,6 +26,8 @@ import UsuariosPage from './components/usuarios/UsuariosPage'
 import PilotosPage from './components/pilotos/PilotosPage'
 import LineasPage from './components/lineas/LineasPage'
 import EstacionesPage from './components/estaciones/EstacionesPage'
+import ParqueosPage from './components/parqueos/ParqueosPage'
+import RecorridosPage from './components/recorridos/RecorridosPage'
 
 function App() {
   return (
@@ -60,11 +62,9 @@ function App() {
           <Route
             path="recorridos"
             element={
-              <ModulePage
-                title="Recorridos"
-                description="Consulta los recorridos disponibles del Transmetro."
-                icon={<RouteRoundedIcon />}
-              />
+              <ProtectedRoute requiredPermission="recorridos.ver">
+                <RecorridosPage />
+              </ProtectedRoute>
             }
           />
 
@@ -89,12 +89,8 @@ function App() {
           <Route
             path="parqueos"
             element={
-              <ProtectedRoute requiredPermission="parqueos.consultar">
-                <ModulePage
-                  title="Parqueos"
-                  description="Administración de parqueos y espacios asignados a los buses."
-                  icon={<LocalParkingRoundedIcon />}
-                />
+              <ProtectedRoute requiredPermission="parqueos.ver">
+                <ParqueosPage />
               </ProtectedRoute>
             }
           />
