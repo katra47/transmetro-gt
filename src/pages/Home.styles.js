@@ -1,24 +1,56 @@
+const tarjeta = {
+  border: '1px solid #DFE9E5',
+  borderRadius: '20px',
+  backgroundColor: '#FFFFFF',
+  boxShadow: '0 8px 25px rgba(8,47,73,0.04)',
+}
+
 export const homeStyles = {
-  page: {
+  pagina: {
     width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 3,
   },
 
-  hero: {
+  cargando: {
+    minHeight: 250,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: 2,
+  },
+
+  acceso: {
+    ...tarjeta,
+    p: { xs: 3, md: 5 },
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 2,
+  },
+
+  titulo: {
+    color: '#082F49',
+    fontSize: { xs: '1.6rem', md: '2rem' },
+    fontWeight: 800,
+  },
+
+  encabezado: {
     position: 'relative',
     overflow: 'hidden',
-    padding: {
-      xs: 3,
-      sm: 4,
-      md: 6,
-    },
-    borderRadius: {
-      xs: '20px',
-      md: '28px',
-    },
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: { xs: 'flex-start', md: 'center' },
+    flexDirection: { xs: 'column', md: 'row' },
+    gap: 3,
+    p: { xs: 3, md: 4 },
+    pb: { xs: 4, md: 5 },
+    borderRadius: '24px',
     color: '#FFFFFF',
     background:
       'linear-gradient(125deg, #082F49 0%, #0A5968 58%, #008C7A 100%)',
-    boxShadow: '0 22px 55px rgba(8, 47, 73, 0.18)',
 
     '&::after': {
       content: '""',
@@ -26,180 +58,237 @@ export const homeStyles = {
       right: 0,
       bottom: 0,
       left: 0,
-      height: 7,
+      height: 6,
       background:
         'repeating-linear-gradient(90deg, #13B8A6 0 35px, #D6A84B 35px 55px, #B4533C 55px 75px, #F8F4E8 75px 85px)',
     },
   },
 
-  decorationLarge: {
-    position: 'absolute',
-    top: -130,
-    right: -80,
-    width: 320,
-    height: 320,
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-
-  decorationSmall: {
-    position: 'absolute',
-    right: 230,
-    bottom: -100,
-    width: 190,
-    height: 190,
-    borderRadius: '50%',
-    backgroundColor: 'rgba(214,168,75,0.08)',
-  },
-
-  heroContent: {
-    position: 'relative',
-    zIndex: 1,
-    maxWidth: 760,
-  },
-
-  panelChip: {
-    marginBottom: 2,
+  chip: {
+    mb: 2,
     color: '#FFE29B',
     backgroundColor: 'rgba(214,168,75,0.14)',
     border: '1px solid rgba(214,168,75,0.35)',
     fontWeight: 700,
   },
 
-  heroTitle: {
-    maxWidth: 720,
+  tituloEncabezado: {
+    fontSize: { xs: '1.7rem', md: '2.2rem' },
+    fontWeight: 800,
+    lineHeight: 1.2,
+    overflowWrap: 'anywhere',
+  },
+
+  descripcionEncabezado: {
+    mt: 1,
+    color: 'rgba(255,255,255,0.85)',
+    lineHeight: 1.6,
+  },
+
+  chipTiempoReal: {
     color: '#FFFFFF',
-    fontSize: {
-      xs: '2rem',
-      sm: '2.6rem',
-      md: '3.3rem',
-    },
-    fontWeight: 800,
-    lineHeight: 1.08,
-    letterSpacing: '-0.04em',
-  },
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    border: '1px solid rgba(255,255,255,0.25)',
+    maxWidth: '100%',
+    height: 'auto',
 
-  heroDescription: {
-    maxWidth: 620,
-    marginTop: 2,
-    color: 'rgba(255,255,255,0.76)',
-    fontSize: {
-      xs: '0.95rem',
-      md: '1.05rem',
-    },
-    lineHeight: 1.7,
-  },
-
-  heroButton: {
-    marginTop: 3,
-    paddingX: 3,
-    paddingY: 1.2,
-    borderRadius: '12px',
-    color: '#082F49',
-    backgroundColor: '#D6A84B',
-    fontWeight: 800,
-    textTransform: 'none',
-    boxShadow: 'none',
-
-    '&:hover': {
-      backgroundColor: '#E5BC67',
-      boxShadow: 'none',
-      transform: 'translateY(-2px)',
+    '& .MuiChip-label': {
+      whiteSpace: 'normal',
+      py: 1,
     },
   },
 
-  sectionHeader: {
-    display: 'flex',
-    alignItems: {
-      xs: 'flex-start',
-      sm: 'center',
-    },
-    justifyContent: 'space-between',
-    flexDirection: {
-      xs: 'column',
-      sm: 'row',
-    },
-    gap: 1,
-    marginTop: 5,
-    marginBottom: 2.5,
-  },
-
-  sectionTitle: {
-    color: '#082F49',
-    fontSize: '1.45rem',
-    fontWeight: 800,
-  },
-
-  sectionDescription: {
-    color: '#64748B',
-    fontSize: '0.9rem',
-  },
-
-  cardsGrid: {
+  indicadoresGrid: {
     display: 'grid',
     gridTemplateColumns: {
       xs: '1fr',
-      md: 'repeat(3, 1fr)',
+      sm: 'repeat(2, minmax(0, 1fr))',
+      lg: 'repeat(4, minmax(0, 1fr))',
+    },
+    gap: 2,
+  },
+
+  indicador: {
+    ...tarjeta,
+    p: 3,
+    minWidth: 0,
+  },
+
+  indicadorIcono: {
+    width: 46,
+    height: 46,
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: '14px',
+    mb: 2,
+  },
+
+  indicadorTitulo: {
+    color: '#475569',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+  },
+
+  indicadorCantidad: {
+    color: '#082F49',
+    fontSize: '2.4rem',
+    fontWeight: 800,
+    lineHeight: 1.4,
+  },
+
+  textoSecundario: {
+    color: '#64748B',
+    fontSize: '0.88rem',
+    lineHeight: 1.6,
+  },
+
+  contenidoGrid: {
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: 'minmax(0, 1fr)',
+      lg: 'repeat(auto-fit, minmax(360px, 1fr))',
     },
     gap: 3,
   },
 
-  optionCard: {
-    display: 'block',
-    height: '100%',
-    padding: 3,
-    color: 'inherit',
-    textDecoration: 'none',
-    border: '1px solid #DFE9E5',
-    borderRadius: '20px',
-    backgroundColor: 'rgba(255,255,255,0.88)',
-    boxShadow: '0 8px 25px rgba(8,47,73,0.05)',
-    transition:
-      'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-
-    '&:hover': {
-      transform: 'translateY(-5px)',
-      borderColor: '#9DDDD1',
-      boxShadow: '0 18px 40px rgba(8,47,73,0.12)',
-    },
+  seccion: {
+    ...tarjeta,
+    p: { xs: 2, md: 3 },
+    minWidth: 0,
   },
 
-  optionIcon: {
-    width: 52,
-    height: 52,
-    display: 'grid',
-    placeItems: 'center',
-    marginBottom: 2,
-    borderRadius: '15px',
-    color: '#007C70',
-    backgroundColor: '#DDF5EE',
+  seccionEncabezado: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: { xs: 'flex-start', sm: 'center' },
+    flexDirection: { xs: 'column', sm: 'row' },
+    gap: 2,
+    mb: 3,
   },
 
-  optionTitle: {
+  seccionTitulo: {
     color: '#082F49',
     fontSize: '1.15rem',
     fontWeight: 800,
+    mb: 0.5,
   },
 
-  optionDescription: {
-    minHeight: 50,
-    marginTop: 1,
+  tabla: {
+    minWidth: 540,
+
+    '& .MuiTableCell-head': {
+      color: '#475569',
+      backgroundColor: '#F1F7F5',
+      fontWeight: 700,
+      whiteSpace: 'nowrap',
+    },
+
+    '& .MuiTableCell-root': {
+      borderBottom: '1px solid #EDF2F0',
+      py: 1.8,
+    },
+  },
+
+  notaTabla: {
+    mt: 2,
     color: '#64748B',
-    fontSize: '0.92rem',
-    lineHeight: 1.6,
+    fontSize: '0.8rem',
   },
 
-  optionAction: {
+  vacio: {
+    minHeight: 180,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    color: '#64748B',
+    textAlign: 'center',
+  },
+
+  alertas: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    mt: 3,
+
+    '& .MuiAlert-root': {
+      borderRadius: '12px',
+    },
+  },
+
+  accesosGrid: {
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: '1fr',
+      sm: 'repeat(2, minmax(0, 1fr))',
+      lg: 'repeat(4, minmax(0, 1fr))',
+    },
+    gap: 2,
+    mt: 2,
+  },
+
+  accesoTarjeta: {
+    ...tarjeta,
+    display: 'block',
+    p: 3,
+    color: 'inherit',
+    textDecoration: 'none',
+    transition:
+      'transform 0.2s ease, border-color 0.2s ease',
+
+    '&:hover': {
+      transform: 'translateY(-3px)',
+      borderColor: '#008C7A',
+    },
+
+    '&:focus-visible': {
+      outline: '3px solid #008C7A',
+      outlineOffset: 3,
+    },
+  },
+
+  accesoIcono: {
+    width: 44,
+    height: 44,
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: '12px',
+    color: '#008C7A',
+    backgroundColor: '#DDF5EE',
+    mb: 2,
+  },
+
+  accesoTitulo: {
+    color: '#082F49',
+    fontSize: '1rem',
+    fontWeight: 800,
+    mb: 1,
+  },
+
+  accesoAccion: {
     display: 'flex',
     alignItems: 'center',
-    gap: 0.5,
-    marginTop: 2,
+    gap: 1,
     color: '#008C7A',
     fontSize: '0.85rem',
-    fontWeight: 800,
+    fontWeight: 700,
+    mt: 2,
   },
 
-  actionIcon: {
-    fontSize: 18,
+  boton: {
+    backgroundColor: '#008C7A',
+    textTransform: 'none',
+    borderRadius: '10px',
+
+    '&:hover': {
+      backgroundColor: '#006F61',
+    },
+  },
+
+  botonTexto: {
+    color: '#008C7A',
+    textTransform: 'none',
+    whiteSpace: 'nowrap',
   },
 }

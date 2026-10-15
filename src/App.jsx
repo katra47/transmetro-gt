@@ -5,46 +5,71 @@ import {
   Routes,
 } from 'react-router-dom'
 
-import AltRouteRoundedIcon from '@mui/icons-material/AltRouteRounded'
-import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded'
-import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded'
-import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded'
-import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
-import LocalParkingRoundedIcon from '@mui/icons-material/LocalParkingRounded'
-import RouteRoundedIcon from '@mui/icons-material/RouteRounded'
-import TrainRoundedIcon from '@mui/icons-material/TrainRounded'
-
 import MainLayout from './components/MainLayout'
 import Home from './pages/Home'
-import ModulePage from './pages/ModulePage'
-import BusesPage from './components/buses/BusesPage'
 
 import LoginPage from './components/usuarios/LoginPage'
 import ProtectedRoute from './components/usuarios/ProtectedRoute'
 import RolesPage from './components/usuarios/RolesPage'
 import UsuariosPage from './components/usuarios/UsuariosPage'
+
+import BusesPage from './components/buses/BusesPage'
 import PilotosPage from './components/pilotos/PilotosPage'
 import LineasPage from './components/lineas/LineasPage'
 import EstacionesPage from './components/estaciones/EstacionesPage'
 import ParqueosPage from './components/parqueos/ParqueosPage'
 import RecorridosPage from './components/recorridos/RecorridosPage'
 
+import ReportesPage from './components/reportes/ReportesPage'
+
+import PasajerosPage from './components/pasajeros/PasajerosPage'
+import PasajerosHome from './components/pasajeros/PasajerosHome'
+
+import PagosPage from './components/pagos/PagosPage'
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* ========================================
+            LOGIN
+        ======================================== */}
+
+        <Route
+          path="/"
+          element={<LoginPage />}
+        />
+
+        <Route
+          path="/iniciar-sesion"
+          element={<LoginPage />}
+        />
+
+
+        {/* ========================================
+            PÁGINAS CON HEADER
+        ======================================== */}
+
         <Route element={<MainLayout />}>
-          <Route index element={<Home />} />
+
+          {/* ========================================
+              ADMINISTRACIÓN
+          ======================================== */}
 
           <Route
-            path="iniciar-sesion"
-            element={<LoginPage />}
+            path="administracion"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="lineas"
             element={
-              <ProtectedRoute requiredPermission="lineas.ver">
+              <ProtectedRoute requiredPermission="lineas.consultar">
                 <LineasPage />
               </ProtectedRoute>
             }
@@ -53,7 +78,7 @@ function App() {
           <Route
             path="estaciones"
             element={
-              <ProtectedRoute requiredPermission="estaciones.ver">
+              <ProtectedRoute requiredPermission="estaciones.consultar">
                 <EstacionesPage />
               </ProtectedRoute>
             }
@@ -62,7 +87,7 @@ function App() {
           <Route
             path="recorridos"
             element={
-              <ProtectedRoute requiredPermission="recorridos.ver">
+              <ProtectedRoute requiredPermission="recorridos.consultar">
                 <RecorridosPage />
               </ProtectedRoute>
             }
@@ -80,7 +105,7 @@ function App() {
           <Route
             path="pilotos"
             element={
-              <ProtectedRoute permission="pilotos.consultar">
+              <ProtectedRoute requiredPermission="pilotos.consultar">
                 <PilotosPage />
               </ProtectedRoute>
             }
@@ -89,24 +114,30 @@ function App() {
           <Route
             path="parqueos"
             element={
-              <ProtectedRoute requiredPermission="parqueos.ver">
+              <ProtectedRoute requiredPermission="parqueos.consultar">
                 <ParqueosPage />
               </ProtectedRoute>
             }
           />
 
+
+          {/* ========================================
+              PAGOS ADMINISTRATIVOS
+          ======================================== */}
+
           <Route
             path="pagos"
             element={
               <ProtectedRoute requiredPermission="pagos.consultar">
-                <ModulePage
-                  title="Pagos"
-                  description="Control de tarjetas de acceso y registro de transacciones."
-                  icon={<CreditCardRoundedIcon />}
-                />
+                <PagosPage />
               </ProtectedRoute>
             }
           />
+
+
+          {/* ========================================
+              USUARIOS
+          ======================================== */}
 
           <Route
             path="usuarios"
@@ -126,37 +157,66 @@ function App() {
             }
           />
 
-          <Route
-            path="personal-administrativo"
-            element={
-              <ProtectedRoute requiredPermission="personal.consultar">
-                <ModulePage
-                  title="Personal administrativo"
-                  description="Registro y control de los empleados administrativos del Transmetro."
-                  icon={<GroupsRoundedIcon />}
-                />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* ========================================
+              REPORTES
+          ======================================== */}
 
           <Route
             path="reportes"
             element={
               <ProtectedRoute requiredPermission="reportes.consultar">
-                <ModulePage
-                  title="Reportes"
-                  description="Consulta de indicadores, historiales e información operativa."
-                  icon={<AssessmentRoundedIcon />}
-                />
+                <ReportesPage />
               </ProtectedRoute>
             }
           />
 
+
+          {/* ========================================
+              PASAJEROS
+          ======================================== */}
+
           <Route
-            path="*"
-            element={<Navigate to="/" replace />}
+            path="pasajeros"
+            element={<PasajerosPage />}
           />
+
+          <Route
+            path="pasajeros/inicio"
+            element={<PasajerosHome />}
+          />
+
+
+          {/* ========================================
+              PAGOS DEL PASAJERO
+          ======================================== */}
+
+          <Route
+            path="pasajeros/pagos"
+            element={
+              <ProtectedRoute passengerOnly>
+                <PagosPage />
+              </ProtectedRoute>
+            }
+          />
+
         </Route>
+
+
+        {/* ========================================
+            RUTA NO ENCONTRADA
+        ======================================== */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   )

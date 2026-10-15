@@ -3,13 +3,16 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
+  useRef,
   useState,
 } from 'react'
 
 import {
   GoogleAuthProvider,
+  browserLocalPersistence,
+  inMemoryPersistence,
   onAuthStateChanged,
+  setPersistence,
   signInWithPopup,
   signOut,
 } from 'firebase/auth'
@@ -31,30 +34,98 @@ googleProvider.setCustomParameters({
   prompt: 'select_account',
 })
 
+function obtenerMensajeError(error) {
+  switch (error.code) {
+    case 'auth/popup-closed-by-user':
+      return 'La ventana de Google fue cerrada.'
+
+    case 'auth/popup-blocked':
+      return 'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e intenta nuevamente.'
+
+    case 'auth/cancelled-popup-request':
+      return 'Ya hay otro inicio de sesión en proceso.'
+
+    case 'auth/network-request-failed':
+      return 'No fue posible conectar. Comprueba tu conexión.'
+
+    case 'auth/unauthorized-domain':
+      return 'Este dominio no está autorizado en Firebase Authentication.'
+
+    default:
+      return 'No fue posible iniciar sesión con Google.'
+  }
+}
+
 function AuthProvider({ children }) {
   const [firebaseUser, setFirebaseUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [role, setRole] = useState(null)
   const [permissions, setPermissions] = useState([])
+
+  // Una sesión recuperada del navegador entra como pasajero.
+  // El administrador debe iniciar sesión desde su botón.
+  const [accessMode, setAccessMode] = useState('PASAJERO')
+
   const [loading, setLoading] = useState(true)
+  const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
 
+  const operacionEnCurso = useRef(false)
+
   useEffect(() => {
+    let vigente = true
+    let version = 0
+
     const unsubscribe = onAuthStateChanged(
       auth,
       async (authenticatedUser) => {
+        const versionActual = ++version
+
+        const sigueVigente = () => (
+          vigente &&
+          versionActual === version
+        )
+
         setLoading(true)
         setAuthError('')
         setFirebaseUser(authenticatedUser)
 
+        setUserProfile(null)
+        setRole(null)
+        setPermissions([])
+
         if (!authenticatedUser) {
-          setUserProfile(null)
-          setRole(null)
-          setPermissions([])
           setLoading(false)
           return
         }
 
+        /*
+         * PASAJERO
+         *
+         * Usa su identidad de Google.
+         * No necesita un rol administrativo.
+         * No crea solicitudes en la colección usuarios.
+         */
+        if (accessMode === 'PASAJERO') {
+          setUserProfile({
+            id: authenticatedUser.uid,
+            nombres:
+              authenticatedUser.displayName ||
+              'Pasajero',
+            correo: authenticatedUser.email || '',
+            fotoURL: authenticatedUser.photoURL || '',
+          })
+
+          setLoading(false)
+          return
+        }
+
+        /*
+         * ADMINISTRADOR
+         *
+         * Verifica el perfil y el rol registrados
+         * en Firestore.
+         */
         try {
           const userReference = doc(
             db,
@@ -64,15 +135,19 @@ function AuthProvider({ children }) {
 
           let userSnapshot = await getDoc(userReference)
 
+          if (!sigueVigente()) return
+
           if (!userSnapshot.exists()) {
-            const pendingProfile = {
+            await setDoc(userReference, {
               nombres:
                 authenticatedUser.displayName ||
                 'Usuario de Google',
+
               correo:
                 authenticatedUser.email
                   ?.trim()
                   .toLowerCase() || '',
+
               fotoURL: authenticatedUser.photoURL || '',
               rolId: null,
               personalId: null,
@@ -80,130 +155,147 @@ function AuthProvider({ children }) {
               creadoEn: serverTimestamp(),
               actualizadoEn: serverTimestamp(),
               ultimoAcceso: null,
-            }
+            })
 
-            await setDoc(
-              userReference,
-              pendingProfile,
-            )
+            if (!sigueVigente()) return
 
             userSnapshot = await getDoc(userReference)
 
-            setUserProfile({
-              id: authenticatedUser.uid,
-              ...pendingProfile,
-            })
+            if (!sigueVigente()) return
+          }
 
-            setRole(null)
-            setPermissions([])
-            setAuthError(
-              'Tu cuenta fue registrada. Un administrador debe asignarte un rol antes de que puedas acceder a las funciones administrativas.',
+          if (!userSnapshot.exists()) {
+            throw new Error(
+              'No fue posible cargar el perfil.',
             )
-
-            return
           }
 
           const profileData = {
-            id: userSnapshot.id,
             ...userSnapshot.data(),
+            id: userSnapshot.id,
           }
 
           setUserProfile(profileData)
 
           if (profileData.estado === 'PENDIENTE') {
-            setRole(null)
-            setPermissions([])
             setAuthError(
-              'Tu solicitud de acceso está pendiente de autorización.',
-            )
-            return
-          }
-
-          if (profileData.estado === 'INACTIVO') {
-            setRole(null)
-            setPermissions([])
-            setAuthError(
-              'Este usuario se encuentra inactivo. Comunícate con el administrador.',
+              'Tu acceso administrativo está pendiente de autorización.',
             )
             return
           }
 
           if (profileData.estado !== 'ACTIVO') {
-            setRole(null)
-            setPermissions([])
             setAuthError(
-              'El estado de este usuario no permite el acceso administrativo.',
+              'Esta cuenta no tiene acceso administrativo activo.',
             )
             return
           }
 
           if (!profileData.rolId) {
-            setRole(null)
-            setPermissions([])
             setAuthError(
-              'Este usuario todavía no tiene un rol asignado.',
+              'Un administrador debe asignar un rol a esta cuenta.',
             )
             return
           }
 
-          const roleReference = doc(
-            db,
-            'roles',
-            profileData.rolId,
+          const roleSnapshot = await getDoc(
+            doc(db, 'roles', profileData.rolId),
           )
 
-          const roleSnapshot = await getDoc(roleReference)
+          if (!sigueVigente()) return
 
           if (!roleSnapshot.exists()) {
-            setRole(null)
-            setPermissions([])
             setAuthError(
-              'El rol asignado al usuario no existe.',
+              'El rol asignado no existe.',
             )
             return
           }
 
           const roleData = {
-            id: roleSnapshot.id,
             ...roleSnapshot.data(),
+            id: roleSnapshot.id,
           }
 
           if (roleData.activo === false) {
-            setRole(null)
-            setPermissions([])
             setAuthError(
-              'El rol asignado se encuentra inactivo.',
+              'El rol asignado está inactivo.',
             )
             return
           }
 
           setRole(roleData)
-          setPermissions(roleData.permisos ?? [])
+
+          setPermissions(
+            Array.isArray(roleData.permisos)
+              ? roleData.permisos
+              : [],
+          )
         } catch (error) {
+          if (!sigueVigente()) return
+
           console.error(
-            'Error al cargar el usuario:',
+            'Error al comprobar acceso administrativo:',
             error,
           )
 
           setUserProfile(null)
           setRole(null)
           setPermissions([])
+
           setAuthError(
-            'No fue posible comprobar los permisos del usuario.',
+            'No fue posible comprobar los permisos administrativos.',
           )
         } finally {
-          setLoading(false)
+          if (sigueVigente()) {
+            setLoading(false)
+          }
         }
       },
     )
 
-    return unsubscribe
-  }, [])
+    return () => {
+      vigente = false
+      version += 1
+      unsubscribe()
+    }
+  }, [accessMode])
 
-  const loginWithGoogle = useCallback(async () => {
+  /*
+   * INICIO DE SESIÓN
+   *
+   * PASAJERO: permanece guardado en el navegador.
+   * ADMINISTRADOR: únicamente en memoria;
+   * al recargar o cerrar debe volver a ingresar.
+   */
+  const iniciarSesion = useCallback(async (modo) => {
+    if (operacionEnCurso.current) {
+      throw new Error(
+        'Ya hay un inicio de sesión en proceso.',
+      )
+    }
+
+    operacionEnCurso.current = true
+
+    setSigningIn(true)
     setAuthError('')
 
+    setFirebaseUser(null)
+    setUserProfile(null)
+    setRole(null)
+    setPermissions([])
+
     try {
+      await signOut(auth)
+
+      setAccessMode(modo)
+
+      await setPersistence(
+        auth,
+        modo === 'ADMINISTRADOR'
+          ? inMemoryPersistence
+          : browserLocalPersistence,
+      )
+
       return await signInWithPopup(
         auth,
         googleProvider,
@@ -214,78 +306,91 @@ function AuthProvider({ children }) {
         error,
       )
 
-      if (error.code === 'auth/popup-closed-by-user') {
-        setAuthError(
-          'La ventana de inicio de sesión fue cerrada.',
-        )
-      } else if (error.code === 'auth/popup-blocked') {
-        setAuthError(
-          'El navegador bloqueó la ventana de inicio de sesión.',
-        )
-      } else {
-        setAuthError(
-          'No fue posible iniciar sesión con Google.',
-        )
-      }
+      setAuthError(obtenerMensajeError(error))
 
       throw error
+    } finally {
+      operacionEnCurso.current = false
+      setSigningIn(false)
     }
   }, [])
 
+  const loginWithGoogle = useCallback(
+    () => iniciarSesion('ADMINISTRADOR'),
+    [iniciarSesion],
+  )
+
+  const loginPassengerWithGoogle = useCallback(
+    () => iniciarSesion('PASAJERO'),
+    [iniciarSesion],
+  )
+
   const logout = useCallback(async () => {
     setAuthError('')
-    await signOut(auth)
-  }, [])
 
-  const hasPermission = useCallback(
-    (permission) => {
-      return (
-        permissions.includes('*') ||
-        permissions.includes(permission)
-      )
-    },
-    [permissions],
-  )
+    await signOut(auth)
+
+    setFirebaseUser(null)
+    setUserProfile(null)
+    setRole(null)
+    setPermissions([])
+    setAccessMode('PASAJERO')
+  }, [])
 
   const isAuthenticated = Boolean(firebaseUser)
 
   const isAuthorized = Boolean(
+    !loading &&
+    !signingIn &&
+    accessMode === 'ADMINISTRADOR' &&
     firebaseUser &&
+    userProfile?.id === firebaseUser.uid &&
     userProfile?.estado === 'ACTIVO' &&
-    role,
+    role &&
+    role.activo !== false,
   )
 
-  const contextValue = useMemo(
-    () => ({
-      firebaseUser,
-      userProfile,
-      role,
-      permissions,
-      loading,
-      authError,
-      isAuthenticated,
-      isAuthorized,
-      loginWithGoogle,
-      logout,
-      hasPermission,
-    }),
-    [
-      firebaseUser,
-      userProfile,
-      role,
-      permissions,
-      loading,
-      authError,
-      isAuthenticated,
-      isAuthorized,
-      loginWithGoogle,
-      logout,
-      hasPermission,
-    ],
+  const isPassenger = Boolean(
+    !loading &&
+    !signingIn &&
+    accessMode === 'PASAJERO' &&
+    firebaseUser,
+  )
+
+  const hasPermission = useCallback(
+    (permission) => (
+      isAuthorized &&
+      (
+        permissions.includes('*') ||
+        permissions.includes(permission)
+      )
+    ),
+    [isAuthorized, permissions],
   )
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider
+      value={{
+        firebaseUser,
+        userProfile,
+        role,
+        permissions,
+
+        accessMode,
+        loading,
+        signingIn,
+        authError,
+
+        isAuthenticated,
+        isAuthorized,
+        isPassenger,
+
+        loginWithGoogle,
+        loginPassengerWithGoogle,
+        logout,
+        hasPermission,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

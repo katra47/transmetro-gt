@@ -1,4 +1,5 @@
 import { useState } from 'react'
+
 import {
   Link,
   useLocation,
@@ -6,6 +7,7 @@ import {
 } from 'react-router-dom'
 
 import {
+  Alert,
   AppBar,
   Avatar,
   Box,
@@ -32,43 +34,45 @@ import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded'
 import LocalParkingRoundedIcon from '@mui/icons-material/LocalParkingRounded'
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded'
 import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded'
-import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'
 import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded'
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded'
-import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import EditRoundedIcon from '@mui/icons-material/EditRounded'
 
 import logo from '../img/logo.png'
+
 import { useAuth } from './usuarios/AuthContext'
 import { headerStyles } from './Header.styles'
 
-const menuItems = [
+
+// ========================================
+// MENÚ ADMINISTRADOR
+// ========================================
+
+const menuAdministrador = [
   {
     title: 'Inicio',
-    path: '/',
+    path: '/administracion',
     icon: <HomeRoundedIcon />,
-    public: true,
   },
   {
     title: 'Líneas',
     path: '/lineas',
     icon: <AltRouteRoundedIcon />,
-    public: true,
+    permission: 'lineas.consultar',
   },
   {
     title: 'Estaciones',
     path: '/estaciones',
     icon: <TrainRoundedIcon />,
-    public: true,
+    permission: 'estaciones.consultar',
   },
   {
     title: 'Recorridos',
     path: '/recorridos',
     icon: <RouteRoundedIcon />,
-    public: true,
+    permission: 'recorridos.consultar',
   },
   {
     title: 'Buses',
@@ -107,12 +111,6 @@ const menuItems = [
     permission: 'roles.consultar',
   },
   {
-    title: 'Personal administrativo',
-    path: '/personal-administrativo',
-    icon: <GroupsRoundedIcon />,
-    permission: 'personal.consultar',
-  },
-  {
     title: 'Reportes',
     path: '/reportes',
     icon: <AssessmentRoundedIcon />,
@@ -120,23 +118,44 @@ const menuItems = [
   },
 ]
 
-function getInitials(name) {
-  if (!name) {
-    return 'U'
-  }
 
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word.charAt(0).toUpperCase())
-    .join('')
+// ========================================
+// MENÚ PASAJERO
+// ========================================
+
+const menuPasajeros = [
+  {
+    title: 'Inicio',
+    path: '/pasajeros/inicio',
+    icon: <HomeRoundedIcon />,
+  },
+  {
+    title: 'Líneas',
+    path: '/pasajeros',
+    icon: <AltRouteRoundedIcon />,
+  },
+  {
+    title: 'Mis pagos',
+    path: '/pasajeros/pagos',
+    icon: <CreditCardRoundedIcon />,
+  },
+]
+
+
+function getInitials(name = '') {
+  return (
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word.charAt(0).toUpperCase())
+      .join('') || 'U'
+  )
 }
 
-function Header() {
-  const [menuAnchor, setMenuAnchor] = useState(null)
-  const [userAnchor, setUserAnchor] = useState(null)
 
+function Header() {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -147,86 +166,116 @@ function Header() {
     loading,
     isAuthenticated,
     isAuthorized,
+    isPassenger,
     hasPermission,
     logout,
   } = useAuth()
 
+  const [menuAnchor, setMenuAnchor] = useState(null)
+  const [userAnchor, setUserAnchor] = useState(null)
+  const [cerrandoSesion, setCerrandoSesion] = useState(false)
+  const [error, setError] = useState('')
+
   const menuOpen = Boolean(menuAnchor)
   const userMenuOpen = Boolean(userAnchor)
 
-  const displayName =
+  const rutaPasajeros = (
+    location.pathname === '/pasajeros' ||
+    location.pathname.startsWith('/pasajeros/')
+  )
+
+  const vistaAdministrativa = (
+    isAuthorized && !rutaPasajeros
+  )
+
+  const visibleMenuItems = vistaAdministrativa
+    ? menuAdministrador.filter((item) => (
+        !item.permission ||
+        hasPermission(item.permission)
+      ))
+    : menuPasajeros
+
+  const displayName = (
     userProfile?.nombres ||
     firebaseUser?.displayName ||
     'Usuario'
+  )
 
-  const displayEmail =
+  const displayEmail = (
     userProfile?.correo ||
     firebaseUser?.email ||
     ''
+  )
 
-  const displayPhoto =
+  const displayPhoto = (
     userProfile?.fotoURL ||
     firebaseUser?.photoURL ||
     ''
+  )
 
-  const displayRole =
-    role?.nombre ||
-    (userProfile?.estado === 'PENDIENTE'
-      ? 'Acceso pendiente'
-      : 'Sin rol asignado')
+  const displayRole = isAuthorized
+    ? role?.nombre || 'Administrador'
+    : isPassenger
+      ? 'Pasajero'
+      : isAuthenticated
+        ? 'Acceso administrativo pendiente'
+        : 'Visitante'
 
-  const visibleMenuItems = menuItems.filter((item) => {
-    if (item.public) {
-      return true
-    }
+  const subtitulo = vistaAdministrativa
+    ? 'Sistema de control y administración'
+    : 'Líneas, estaciones y trayectos'
 
-    if (!isAuthorized || !item.permission) {
-      return false
-    }
-
-    return hasPermission(item.permission)
-  })
-
-  const openMenu = (event) => {
-    setMenuAnchor(event.currentTarget)
-  }
-
-  const closeMenu = () => {
+  const cerrarMenu = () => {
     setMenuAnchor(null)
   }
 
-  const openUserMenu = (event) => {
-    setUserAnchor(event.currentTarget)
-  }
-
-  const closeUserMenu = () => {
+  const cerrarMenuUsuario = () => {
     setUserAnchor(null)
   }
 
-  const isCurrentPage = (path) => {
-    if (path === '/') {
-      return location.pathname === '/'
-    }
+  const isCurrentPage = (path) => (
+    location.pathname === path
+  )
 
-    return location.pathname.startsWith(path)
-  }
+  const cambiarAcceso = () => {
+    cerrarMenu()
+    cerrarMenuUsuario()
 
-  const handleEditProfile = () => {
-    closeUserMenu()
-    navigate('/perfil')
+    navigate('/iniciar-sesion')
   }
 
   const handleLogout = async () => {
-    closeUserMenu()
+    if (cerrandoSesion) return
+
+    cerrarMenuUsuario()
+    cerrarMenu()
+
+    setError('')
+    setCerrandoSesion(true)
 
     try {
       await logout()
-      navigate('/')
-    } catch (error) {
+
+      try {
+        localStorage.removeItem('transmetro.tipoEntrada')
+      } catch {
+        // El navegador puede impedir usar localStorage.
+      }
+
+      navigate('/iniciar-sesion', {
+        replace: true,
+      })
+    } catch (logoutError) {
       console.error(
         'No fue posible cerrar la sesión:',
-        error,
+        logoutError,
       )
+
+      setError(
+        'No fue posible cerrar la sesión. Intenta nuevamente.',
+      )
+    } finally {
+      setCerrandoSesion(false)
     }
   }
 
@@ -234,47 +283,61 @@ function Header() {
     <AppBar
       position="fixed"
       elevation={0}
-      sx={headerStyles.appBar}
+      sx={[
+        headerStyles.appBar,
+
+        !vistaAdministrativa && {
+          background:
+            'linear-gradient(110deg, #075E60 0%, #008C7A 100%)',
+        },
+      ]}
     >
       <Toolbar sx={headerStyles.toolbar}>
+
+        {/* LOGO Y BOTÓN DE MENÚ */}
         <Box sx={headerStyles.logoWrapper}>
           <Tooltip title="Abrir menú">
             <IconButton
               type="button"
-              onClick={openMenu}
+              onClick={(event) => {
+                setMenuAnchor(event.currentTarget)
+              }}
               aria-label="Abrir menú de navegación"
               aria-controls={
-                menuOpen
-                  ? 'main-navigation'
-                  : undefined
+                menuOpen ? 'main-navigation' : undefined
               }
               aria-haspopup="true"
-              aria-expanded={
-                menuOpen ? 'true' : undefined
-              }
+              aria-expanded={menuOpen || undefined}
               sx={headerStyles.logoButton}
             >
               <Box
                 component="img"
                 src={logo}
-                alt="Logo de Transmetro GT"
+                alt="Transmetro GT"
                 sx={headerStyles.logoImage}
               />
             </IconButton>
           </Tooltip>
 
-          <Box sx={headerStyles.arrowBadge}>
+          <Box
+            sx={{
+              ...headerStyles.arrowBadge,
+              pointerEvents: 'none',
+            }}
+          >
             <KeyboardArrowDownRoundedIcon
               sx={headerStyles.arrowIcon}
             />
           </Box>
         </Box>
 
+
+        {/* MENÚ PRINCIPAL */}
         <Menu
           id="main-navigation"
           anchorEl={menuAnchor}
           open={menuOpen}
-          onClose={closeMenu}
+          onClose={cerrarMenu}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'left',
@@ -290,7 +353,9 @@ function Header() {
           }}
         >
           <Typography sx={headerStyles.menuTitle}>
-            Navegación
+            {vistaAdministrativa
+              ? 'Administración'
+              : 'Consulta de pasajeros'}
           </Typography>
 
           {visibleMenuItems.map((item) => {
@@ -302,7 +367,7 @@ function Header() {
                 component={Link}
                 to={item.path}
                 selected={selected}
-                onClick={closeMenu}
+                onClick={cerrarMenu}
                 sx={headerStyles.menuItem}
               >
                 <ListItemIcon
@@ -319,40 +384,91 @@ function Header() {
               </MenuItem>
             )
           })}
+
+
+          {/* ADMINISTRADOR PUEDE VOLVER A SU PANEL */}
+          {!vistaAdministrativa && isAuthorized && (
+            <MenuItem
+              component={Link}
+              to="/administracion"
+              onClick={cerrarMenu}
+              sx={headerStyles.menuItem}
+            >
+              <ListItemIcon sx={headerStyles.menuIcon}>
+                <AdminPanelSettingsRoundedIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Panel administrativo" />
+            </MenuItem>
+          )}
+
+
+          {/* ADMINISTRADOR PUEDE VER LA VISTA DE PASAJEROS */}
+          {vistaAdministrativa && (
+            <MenuItem
+              component={Link}
+              to="/pasajeros/inicio"
+              onClick={cerrarMenu}
+              sx={headerStyles.menuItem}
+            >
+              <ListItemIcon sx={headerStyles.menuIcon}>
+                <DirectionsBusRoundedIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Vista de pasajeros" />
+            </MenuItem>
+          )}
+
+
+          {/* USUARIO NO AUTENTICADO */}
+          {!isAuthenticated && (
+            <MenuItem
+              onClick={cambiarAcceso}
+              sx={headerStyles.menuItem}
+            >
+              <ListItemIcon sx={headerStyles.menuIcon}>
+                <LoginRoundedIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Elegir tipo de acceso" />
+            </MenuItem>
+          )}
         </Menu>
 
+
+        {/* IDENTIDAD DEL SISTEMA */}
         <Box sx={headerStyles.identity}>
           <Box sx={headerStyles.titleRow}>
             <Typography
-              component="h1"
+              component="div"
               sx={headerStyles.title}
             >
               Transmetro GT
             </Typography>
 
             <Chip
-              label="Guatemala"
+              label={
+                vistaAdministrativa
+                  ? 'Administración'
+                  : isPassenger
+                    ? 'Pasajeros'
+                    : isAuthorized
+                      ? 'Consulta pública'
+                      : 'Visitante'
+              }
               size="small"
               sx={headerStyles.countryChip}
             />
           </Box>
 
           <Typography sx={headerStyles.subtitle}>
-            Sistema de control y administración
+            {subtitulo}
           </Typography>
         </Box>
 
-        <Tooltip title="Notificaciones">
-          <IconButton
-            type="button"
-            aria-label="Ver notificaciones"
-            sx={headerStyles.notificationButton}
-          >
-            <NotificationsNoneRoundedIcon />
-          </IconButton>
-        </Tooltip>
 
-        {loading ? (
+        {/* USUARIO */}
+        {loading || cerrandoSesion ? (
           <Box sx={headerStyles.loadingUser}>
             <CircularProgress
               size={24}
@@ -368,23 +484,21 @@ function Header() {
             <LoginRoundedIcon />
 
             <Typography sx={headerStyles.loginText}>
-              Iniciar sesión
+              Ingresar
             </Typography>
           </ButtonBase>
         ) : (
           <ButtonBase
             type="button"
-            onClick={openUserMenu}
+            onClick={(event) => {
+              setUserAnchor(event.currentTarget)
+            }}
             aria-label="Abrir menú de usuario"
             aria-controls={
-              userMenuOpen
-                ? 'user-navigation'
-                : undefined
+              userMenuOpen ? 'user-navigation' : undefined
             }
             aria-haspopup="true"
-            aria-expanded={
-              userMenuOpen ? 'true' : undefined
-            }
+            aria-expanded={userMenuOpen || undefined}
             sx={headerStyles.userBox}
           >
             <Avatar
@@ -411,11 +525,13 @@ function Header() {
           </ButtonBase>
         )}
 
+
+        {/* MENÚ DEL USUARIO */}
         <Menu
           id="user-navigation"
           anchorEl={userAnchor}
-          open={userMenuOpen}
-          onClose={closeUserMenu}
+          open={userMenuOpen && isAuthenticated}
+          onClose={cerrarMenuUsuario}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right',
@@ -457,18 +573,8 @@ function Header() {
           <Divider sx={headerStyles.accountDivider} />
 
           <MenuItem
-            onClick={handleEditProfile}
-            sx={headerStyles.accountMenuItem}
-          >
-            <ListItemIcon>
-              <EditRoundedIcon fontSize="small" />
-            </ListItemIcon>
-
-            <ListItemText primary="Editar perfil" />
-          </MenuItem>
-
-          <MenuItem
             onClick={handleLogout}
+            disabled={cerrandoSesion}
             sx={headerStyles.logoutMenuItem}
           >
             <ListItemIcon>
@@ -479,6 +585,17 @@ function Header() {
           </MenuItem>
         </Menu>
       </Toolbar>
+
+
+      {/* ERROR */}
+      {error && (
+        <Alert
+          severity="error"
+          onClose={() => setError('')}
+        >
+          {error}
+        </Alert>
+      )}
     </AppBar>
   )
 }
